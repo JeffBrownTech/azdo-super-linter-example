@@ -1,0 +1,66 @@
+trigger:
+- main
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: PreDeployment
+  jobs:
+    - job: Code_Validation
+      steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 1
+      - script: |
+          docker pull github/super-linter:latest    
+        displayName: Pull github/super-linter docker image
+
+      - script: |
+          docker run -e RUN_LOCAL=true -e VALIDATE_ARM=true -e -v $(System.DefaultWorkingDirectory):/tmp/lint github/super-linter
+        displayName: super-linter validation
+
+      - task: AzureResourceGroupDeployment@2
+        displayName: Validate ARM Template
+        inputs:
+          azureSubscription: spn-azuredevops-pipelines
+          action: Create Or Update Resource Group
+          deploymentMode: Validation
+          resourceGroupName: rg-azdo-arm
+          templateLocation: Linked artifact
+          csmFile: $(System.DefaultWorkingDirectory)/azuredeploy.json
+          csmParametersFile: $(System.DefaultWorkingDirectory)/azuredeploy.parameters.json
+
+      - task: AzurePowerShell@5
+        displayName: Display ARM -WhatIf
+        inputs:
+          azureSubscription: 'spn-azuredevops-pipelines'
+          azurePowerShellVersion: LatestVersion
+          ScriptType: InlineScript
+          Inline: New-AzResourceGroupDeployment -ResourceGroupName 'rg-azdo-arm' -TemplateFile $(System.DefaultWorkingDirectory)/azuredeploy.json -TemplateParameterFile $(System.DefaultWorkingDirectory)/azuredeploy.parameters.json -WhatIf
+
+      - publish: $(System.DefaultWorkingDirectory)
+        displayName: Publish Artifact
+        artifact: ARMTemplate
+
+- stage: Deployment
+  jobs:
+    - job: DeployInfrastructure
+      steps:
+        - checkout: none
+        - task: DownloadPipelineArtifact@2
+          inputs:
+            artifactName: ARMTemplate
+            targetPath: $(System.ArtifactsDirectory)
+        - task: AzureResourceGroupDeployment@2
+          displayName: Deploy ARM Template
+          inputs:
+            azureSubscription: spn-azuredevops-pipelines
+            action: Create Or Update Resource Group
+            deploymentMode: Incremental
+            resourceGroupName: rg-azdo-arm
+            templateLocation: Linked artifact
+            csmFile: $(System.ArtifactsDirectory)/azuredeploy.json
+            csmParametersFile: $(System.ArtifactsDirectory)/azuredeploy.parameters.json

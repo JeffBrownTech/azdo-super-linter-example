@@ -1,0 +1,15 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sa_Name": {
+            "value": "jbtsuperlinterdemo"
+        },
+        "sa_Kind": {
+            "value": "StorageV2"
+        },
+        "sa_Tier": {
+            "value": "Standard_LRS"
+        }
+    }
+}
