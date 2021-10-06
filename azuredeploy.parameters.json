@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "sa_Name": {
-            "value": "jbtsuperlinterdemo"
+            "value": // Enter globally unique storage account name here
         },
         "sa_Kind": {
             "value": "StorageV2"
