@@ -29,10 +29,10 @@ stages:
       - task: AzureResourceGroupDeployment@2
         displayName: Validate ARM Template
         inputs:
-          azureSubscription: spn-azuredevops-pipelines
+          azureSubscription: {enter service connection}
           action: Create Or Update Resource Group
           deploymentMode: Validation
-          resourceGroupName: rg-azdo-arm
+          resourceGroupName: {resource group name}
           templateLocation: Linked artifact
           csmFile: $(System.DefaultWorkingDirectory)/azuredeploy.json
           csmParametersFile: $(System.DefaultWorkingDirectory)/azuredeploy.parameters.json
@@ -40,10 +40,10 @@ stages:
       - task: AzurePowerShell@5
         displayName: Display ARM -WhatIf
         inputs:
-          azureSubscription: 'spn-azuredevops-pipelines'
+          azureSubscription: {enter service connection}
           azurePowerShellVersion: LatestVersion
           ScriptType: InlineScript
-          Inline: New-AzResourceGroupDeployment -ResourceGroupName 'rg-azdo-arm' -TemplateFile $(System.DefaultWorkingDirectory)/azuredeploy.json -TemplateParameterFile $(System.DefaultWorkingDirectory)/azuredeploy.parameters.json -WhatIf
+          Inline: New-AzResourceGroupDeployment -ResourceGroupName '{resource group name}' -TemplateFile $(System.DefaultWorkingDirectory)/azuredeploy.json -TemplateParameterFile $(System.DefaultWorkingDirectory)/azuredeploy.parameters.json -WhatIf
 
       - publish: $(System.DefaultWorkingDirectory)
         displayName: Publish Artifact
@@ -61,10 +61,10 @@ stages:
         - task: AzureResourceGroupDeployment@2
           displayName: Deploy ARM Template
           inputs:
-            azureSubscription: spn-azuredevops-pipelines
+            azureSubscription: {enter service connection}
             action: Create Or Update Resource Group
             deploymentMode: Incremental
-            resourceGroupName: rg-azdo-arm
+            resourceGroupName: {resource group name}
             templateLocation: Linked artifact
             csmFile: $(System.ArtifactsDirectory)/azuredeploy.json
             csmParametersFile: $(System.ArtifactsDirectory)/azuredeploy.parameters.json
