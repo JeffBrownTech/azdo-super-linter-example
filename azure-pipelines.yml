@@ -19,7 +19,11 @@ stages:
         displayName: Pull github/super-linter docker image
 
       - script: |
-          docker run -e RUN_LOCAL=true -e VALIDATE_ARM=true -e -v $(System.DefaultWorkingDirectory):/tmp/lint github/super-linter
+          docker run \
+            -e RUN_LOCAL=true \
+            -e VALIDATE_ARM=true \
+            -v $(System.DefaultWorkingDirectory):/tmp/lint \
+            github/super-linter
         displayName: super-linter validation
 
       - task: AzureResourceGroupDeployment@2
